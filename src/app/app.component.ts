@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { Observable, Subscriber } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -27,6 +28,90 @@ import { Component } from '@angular/core';
   `,
   styles: []
 })
-export class AppComponent {
+// implementamos a interface onInit
+
+export class AppComponent implements OnInit {
+  
   title = 'RXJS';
+
+  // Criando um método que retorna uma Promise:
+
+  minhaPromise(nome: string) : Promise<string> {
+  // Dentro dessa Promise, vamos passar um nome: string
+  // Essa Promise pode retornar tanto uma resposta positiva (resolve), quanto uma resposta negativa (reject).
+    return new Promise((resolve, reject) => {
+      if (nome === 'Eduardo'){
+        setTimeout(() => {
+          resolve('Seja bem vindo ' + nome);
+        }, 1000);
+      }
+      else {
+        reject('Ops! Você não é o Eduardo');
+      }
+    })
+  }
+
+  // Criando um método que retorna uma Observable:
+
+  minhaObservable(nome: string) : Observable<string> {
+    return new Observable(Subscriber => {
+      if (nome === 'Eduardo') {
+        Subscriber.next('Olá! ' + nome);
+        Subscriber.next('Olá de novo! ' + nome);
+        setTimeout(() => {
+          Subscriber.next('Resposta com delay');
+        }, 5000);
+        // Fiz tudo que tinha que fazer e você não vai receber mais nada agora:
+        Subscriber.complete(); 
+      }  
+      else {
+        Subscriber.error('Ops! Deu erro!');
+      }  
+    })
+  }
+
+  // O OnInit é sempre o primeiro método que é chamado dentro do construtor, assim que inicializar o componente. 
+  // Dentro do OnInit vamos fazer a declaração da chamada dessa Promise
+
+  ngOnInit(): void {
+    // Chamada da Promise --------------------------------------------------------------------------------------------
+
+    // Exemplo de resposta positiva: 
+    // this.minhaPromise('Eduardo')
+    // .then(result => console.log(result))
+
+    // Exemplo de resposta negativa:
+    // this.minhaPromise('José')
+    // .then(result => console.log(result))
+    // Está chamada irá retornar um runtime error. Para que isso não ocorra, podemos tratar esse erro:    
+    // .catch(erro => console.log(erro))
+
+    // Chamada da Observable -----------------------------------------------------------------------------------------
+
+    // this.minhaObservable('Eduardo')
+    //   .subscribe(
+    //     result => console.log(result),
+    //     erro => console.log(erro));
+    //     () => console.log('FIM');
+
+    // Criando um observer (estrutura de funções para trabalhar com o Subscriber de uma Observable) ------------------
+
+    // Vamos criar uma constante, chamada observer, que vai ser igual a uma estrutura de um objeto.
+    // Ele contém instruções do que fazer no caso de um Recebimento de valor, de um Erro e caso a Observable chegue até o fim do processo dela.
+    // Esses nomes: next, error e complete são referências às chamadas do subscriber dentro do método MinhaObservable(). Então, no momento de criar um Observer, precisamos respeitar toda a estrutura em torno da Observable.
+
+     const observer = {
+      // Recebimento
+      next: valor => console.log('Next: ', valor),
+      // Erro
+      error: erro => console.log('Erro: ', erro),
+      // Fim
+      complete: () => console.log('FIM"')
+     }
+
+     // Observable dentro de uma const -------------------------------------------------------------------------------
+
+     const obs = this.minhaObservable('Eduardo');
+     obs.subscribe(observer);
+  }
 }
