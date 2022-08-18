@@ -70,6 +70,33 @@ export class AppComponent implements OnInit {
     })
   }
 
+  // Criando um método que retorna uma Observable que retorna um objeto tipado: 
+  usuarioObservable(nome: string, email: string) : Observable<Usuario> {
+    return new Observable(Subscriber => {
+      if (nome === 'Admin') {
+        let usuario = new Usuario(nome, email);
+        setTimeout(() => {
+          Subscriber.next(usuario);
+        }, 1000);
+        setTimeout(() => {
+          Subscriber.next(usuario);
+        }, 2000);
+        setTimeout(() => {
+          Subscriber.next(usuario);
+        }, 3000);
+        setTimeout(() => {
+          Subscriber.next(usuario);
+        }, 4000);
+        setTimeout(() => {
+          Subscriber.complete(); 
+        }, 5000);
+      }  
+      else {
+        Subscriber.error('Ops! Deu erro!');
+      }  
+    })
+  }
+
   // O OnInit é sempre o primeiro método que é chamado dentro do construtor, assim que inicializar o componente. 
   // Dentro do OnInit vamos fazer a declaração da chamada dessa Promise
 
@@ -106,12 +133,33 @@ export class AppComponent implements OnInit {
       // Erro
       error: erro => console.log('Erro: ', erro),
       // Fim
-      complete: () => console.log('FIM"')
+      complete: () => console.log('FIM')
      }
 
-     // Observable dentro de uma const -------------------------------------------------------------------------------
+    // Observable dentro de uma const --------------------------------------------------------------------------------
 
-     const obs = this.minhaObservable('Eduardo');
-     obs.subscribe(observer);
+    // Chamada da minhaObservable()
+    //  const obs = this.minhaObservable('Eduardo');
+    //  obs.subscribe(observer);
+
+    // Chamada da usuarioObservable()
+    const obs = this.usuarioObservable('Admin', 'admin@admin.com');
+    const subs =  obs.subscribe(observer);
+
+    // Fechando uma conexão com o unsubscribe
+    setTimeout(() => {
+      subs.unsubscribe();
+      console.log("Conexão fechada: " + subs.closed);
+    }, 3500);
   }
+}
+export class Usuario {
+
+  constructor(nome: string, email: string) {
+    this.nome = nome;
+    this.email = email;    
+  }
+
+  nome: string;
+  email: string;
 }
